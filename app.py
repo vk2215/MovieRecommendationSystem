@@ -1,5 +1,6 @@
 import requests
 import time
+import gzip
 from PIL import Image
 from io import BytesIO
 import streamlit as st
@@ -41,7 +42,25 @@ st.header('Movie Recommender System')
 movies = pickle.load(open('movie_dict.pkl', 'rb'))
 movies = pd.DataFrame(movies)
 
-similarity = pickle.load(open('similarity.pkl', 'rb'))
+#similarity = pickle.load(open('similarity.pkl', 'rb'))
+
+try:
+    with open('similarity.pkl', 'rb') as f:
+        similarity = pickle.load(f)
+except FileNotFoundError:
+    print("File not found. Make sure 'similarity.pkl' exists in the directory.")
+    raise
+
+# Example of reducing the data size (adjust according to your data structure)
+# For demonstration, we are keeping only the first 10000 entries (assuming it's a list or similar)
+reduced_similarity = similarity[:10000]  # Adjust based on your data structure
+
+# Compress and save the reduced data
+with gzip.open('similarity_reduced.pkl.gz', 'wb') as f:
+    pickle.dump(reduced_similarity, f)
+
+print("File has been compressed and saved as 'similarity_reduced.pkl.gz'.")
+
 
 movie_list = movies['title'].values
 selected_movie = st.selectbox(
